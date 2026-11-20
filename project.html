@@ -608,9 +608,9 @@ footer {
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="data/projects.js"></script>
 <script>
-  const SUPABASE_URL = "https://alnjcmucdopkbnnhvpcx.supabase.co";
+  const SUPABASE_URL = "https://alnjcmucdopkbnnhvpcx.sb.co";
   const SUPABASE_KEY = "sb_publishable_cRPbMziUWTSbU7rbhZdFTQ_s3sL7vuh";
-  const supabase = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
+  const sb = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
 
   mermaid.initialize({
     startOnLoad: false,
@@ -710,9 +710,9 @@ footer {
     renderProjectPage(p, projectsList[prevIdx].id, projectsList[nextIdx].id);
 
     // Supabase Live Fetch
-    if (supabase) {
+    if (sb) {
       try {
-        const { data: dbProjs } = await supabase.from('projects').select('*').order('display_order', { ascending: true });
+        const { data: dbProjs } = await sb.from('projects').select('*').order('display_order', { ascending: true });
         if (dbProjs && dbProjs.length > 0) {
           projectsList = dbProjs;
           idx = projectsList.findIndex(item => item.id === pid);

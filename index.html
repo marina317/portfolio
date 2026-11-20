@@ -567,9 +567,9 @@ footer {
 <script src="data/projects.js"></script>
 <script>
   // Supabase Live Client
-  const SUPABASE_URL = "https://alnjcmucdopkbnnhvpcx.supabase.co";
+  const SUPABASE_URL = "https://alnjcmucdopkbnnhvpcx.sb.co";
   const SUPABASE_KEY = "sb_publishable_cRPbMziUWTSbU7rbhZdFTQ_s3sL7vuh";
-  const supabase = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
+  const sb = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
 
   let activeProfile = PROFILE;
   let activeProjects = PROJECTS;
@@ -696,32 +696,32 @@ footer {
 
   // ── Live Supabase Hydration ──
   async function fetchLiveSupabaseData() {
-    if (!supabase) return;
+    if (!sb) return;
     try {
-      const { data: prof } = await supabase.from('site_content').select('data').eq('id', 'profile').maybeSingle();
+      const { data: prof } = await sb.from('site_content').select('data').eq('id', 'profile').maybeSingle();
       if (prof && prof.data) {
         activeProfile = { ...activeProfile, ...prof.data };
         renderProfile(activeProfile);
       }
 
-      const { data: pub } = await supabase.from('site_content').select('data').eq('id', 'publication').maybeSingle();
+      const { data: pub } = await sb.from('site_content').select('data').eq('id', 'publication').maybeSingle();
       if (pub && pub.data) {
         renderPublication(pub.data);
       }
 
-      const { data: projs } = await supabase.from('projects').select('*').order('display_order', { ascending: true });
+      const { data: projs } = await sb.from('projects').select('*').order('display_order', { ascending: true });
       if (projs && projs.length > 0) {
         activeProjects = projs;
         renderProjects(activeProjects);
       }
 
-      const { data: exps } = await supabase.from('experiences').select('*').order('display_order', { ascending: true });
+      const { data: exps } = await sb.from('experiences').select('*').order('display_order', { ascending: true });
       if (exps && exps.length > 0) {
         activeExperiences = exps;
         renderExperience(activeExperiences);
       }
 
-      const { data: hls } = await supabase.from('highlights').select('*').order('display_order', { ascending: true });
+      const { data: hls } = await sb.from('highlights').select('*').order('display_order', { ascending: true });
       if (hls && hls.length > 0) {
         activeHighlights = hls;
         renderHighlights(activeHighlights);

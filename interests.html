@@ -575,9 +575,9 @@ footer {
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="data/projects.js"></script>
 <script>
-  const SUPABASE_URL = "https://alnjcmucdopkbnnhvpcx.supabase.co";
+  const SUPABASE_URL = "https://alnjcmucdopkbnnhvpcx.sb.co";
   const SUPABASE_KEY = "sb_publishable_cRPbMziUWTSbU7rbhZdFTQ_s3sL7vuh";
-  const supabase = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
+  const sb = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
 
   function renderSkills(skills = SKILLS_DATA) {
     const container = document.getElementById('skills-container');
@@ -594,13 +594,13 @@ footer {
   }
 
   async function loadLiveSkills() {
-    if (!supabase) return;
+    if (!sb) return;
     try {
-      const { data } = await supabase.from('site_content').select('data').eq('id', 'skills').maybeSingle();
+      const { data } = await sb.from('site_content').select('data').eq('id', 'skills').maybeSingle();
       if (data && data.data && data.data.length > 0) {
         renderSkills(data.data);
       }
-      const { data: prof } = await supabase.from('site_content').select('data').eq('id', 'profile').maybeSingle();
+      const { data: prof } = await sb.from('site_content').select('data').eq('id', 'profile').maybeSingle();
       if (prof && prof.data && prof.data.cv) {
         document.getElementById('nav-cv').href = prof.data.cv;
       }
