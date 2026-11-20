@@ -1,1 +1,4 @@
-admin.html
+# Dependencies & artifacts
+node_modules/
+.DS_Store
+Thumbs.db

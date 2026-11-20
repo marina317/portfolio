@@ -6,6 +6,7 @@
   <title>Marina Mohsen — AI Engineer</title>
   <meta name="description" content="Portfolio of Marina Mohsen, AI Engineer specializing in deep learning, model optimization, and edge deployment." />
   <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
 /* ============================================================
    MARINA MOHSEN — PORTFOLIO DESIGN SYSTEM
@@ -432,7 +433,7 @@ footer {
 <!-- ── NAVIGATION BAR ── -->
 <nav class="nav">
   <div class="nav-inner">
-    <a href="index.html" class="nav-logo">Marina Mohsen<span>.</span></a>
+    <a href="index.html" class="nav-logo"><span id="nav-brand-name">Marina Mohsen</span><span>.</span></a>
     <ul class="nav-links">
       <li><a href="#projects">Projects</a></li>
       <li><a href="#experience">Experience</a></li>
@@ -450,12 +451,12 @@ footer {
     <div class="hero-split">
       <!-- Left Side: Editorial Typography -->
       <div class="hero-text-side">
-        <div class="hero-tagline">
+        <div id="hero-tagline" class="hero-tagline">
           <span class="hero-dot"></span>
           AI Engineer · Cairo, Egypt ⇄ Remote Worldwide
         </div>
-        <h1 class="hero-name-big">Marina Mohsen</h1>
-        <p class="hero-desc">
+        <h1 id="hero-name" class="hero-name-big">Marina Mohsen</h1>
+        <p id="hero-desc" class="hero-desc">
           I build, fine-tune, and deploy machine learning architectures end-to-end — from parameter-efficient foundation model adaptation to mathematical kernel surgery and low-latency inference on edge hardware.
         </p>
         <div class="hero-actions-row">
@@ -476,7 +477,7 @@ footer {
           <img src="assets/images/marina-photo.jpg" alt="Marina Mohsen — AI Engineer" />
           <div class="hero-portrait-tag">
             <span class="status-indicator"></span>
-            Available for AI Engineering &amp; Research
+            <span id="hero-availability">Available for AI Engineering &amp; Research</span>
           </div>
         </div>
       </div>
@@ -494,7 +495,7 @@ footer {
     </div>
 
     <div id="projects-container">
-      <!-- Populated dynamically from projects.js -->
+      <!-- Populated dynamically -->
     </div>
   </div>
 </section>
@@ -526,17 +527,17 @@ footer {
     </div>
 
     <!-- Publication Spotlight Banner -->
-    <div class="pub-banner">
-      <div style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.1em; color:var(--acc); font-weight:700; margin-bottom:12px;">
+    <div id="pub-banner" class="pub-banner">
+      <div id="pub-banner-tag" style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.1em; color:var(--acc); font-weight:700; margin-bottom:12px;">
         ✓ Accepted Research Publication · Forthcoming 2026
       </div>
-      <h3 style="font-size: clamp(1.6rem, 3vw, 2.2rem); margin-bottom: 12px;">
+      <h3 id="pub-banner-title" style="font-size: clamp(1.6rem, 3vw, 2.2rem); margin-bottom: 12px;">
         "Per-Frame Equivalence Is Not Closed-Loop Equivalence: Auditing the Embedded Deployment of an Aerial Object Tracker"
       </h3>
-      <div style="font-size:0.95rem; color:var(--ink-secondary); margin-bottom: 16px;">
+      <div id="pub-banner-authors" style="font-size:0.95rem; color:var(--ink-secondary); margin-bottom: 16px;">
         Mahmoud E. Ibrahim*, <strong>Marina Mohsen*</strong> (Co-Author) · Menoufia University &amp; MURC
       </div>
-      <p style="margin:0; font-size:1rem; line-height:1.75;">
+      <p id="pub-banner-finding" style="margin:0; font-size:1rem; line-height:1.75;">
         <strong style="color:var(--ink);">Finding:</strong> Proved that standard per-frame tolerance testing (&epsilon; &lt; 9.2&times;10⁻⁵) fails in sequential vision pipelines. When an FP16 TensorRT engine reverted to FP32, micro-rounding perturbations induced argmax peak-flips that caused a <strong>−2.81 AUC closed-loop trajectory divergence</strong>.
       </p>
     </div>
@@ -565,18 +566,75 @@ footer {
 <!-- ── SCRIPTS ── -->
 <script src="data/projects.js"></script>
 <script>
-  function renderProjects() {
+  // Supabase Live Client
+  const SUPABASE_URL = "https://alnjcmucdopkbnnhvpcx.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_cRPbMziUWTSbU7rbhZdFTQ_s3sL7vuh";
+  const supabase = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
+
+  let activeProfile = PROFILE;
+  let activeProjects = PROJECTS;
+  let activeExperiences = EXPERIENCES;
+  let activeHighlights = HIGHLIGHTS;
+
+  function renderProfile(p = activeProfile) {
+    if (document.getElementById('nav-cv')) document.getElementById('nav-cv').href = p.cv || 'assets/cv.pdf';
+    if (document.getElementById('hero-github')) document.getElementById('hero-github').href = p.github || 'https://github.com/marina317';
+    if (document.getElementById('hero-name') && p.name) document.getElementById('hero-name').textContent = p.name;
+    if (document.getElementById('nav-brand-name') && p.name) document.getElementById('nav-brand-name').textContent = p.name;
+    if (document.getElementById('hero-tagline')) {
+      document.getElementById('hero-tagline').innerHTML = `<span class="hero-dot"></span> ${p.tagline || (p.title + ' · ' + p.location)}`;
+    }
+    if (document.getElementById('hero-desc') && p.bio) document.getElementById('hero-desc').textContent = p.bio;
+    if (document.getElementById('hero-availability') && p.availability) document.getElementById('hero-availability').textContent = p.availability;
+
+    const contact = document.getElementById('contact-container');
+    if (contact) {
+      contact.innerHTML = `
+        <a href="mailto:${p.email}" class="pill-btn pill-btn-solid">
+          <svg viewBox="0 0 24 24" style="width:14px;height:14px;fill:currentColor;margin-right:6px"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+          ${p.email}
+        </a>
+        <a href="${p.github}" target="_blank" rel="noopener" class="pill-btn pill-btn-outline">
+          <svg viewBox="0 0 24 24" style="width:14px;height:14px;fill:currentColor;margin-right:6px"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.44 9.8 8.21 11.39.6.11.82-.26.82-.58v-2.03c-3.34.73-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.09-.75.08-.73.08-.73 1.2.08 1.84 1.24 1.84 1.24 1.07 1.83 2.81 1.3 3.5 1 .11-.78.42-1.3.76-1.6-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.12-.3-.54-1.52.12-3.17 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 013-.4c1.02.005 2.04.14 3 .4 2.28-1.55 3.29-1.23 3.29-1.23.66 1.65.24 2.87.12 3.17.77.84 1.24 1.91 1.24 3.22 0 4.61-2.81 5.63-5.48 5.92.43.37.81 1.1.81 2.22v3.29c0 .32.21.7.82.58C20.56 21.8 24 17.3 24 12c0-6.63-5.37-12-12-12z"/></svg>
+          GitHub
+        </a>
+        <a href="${p.whatsapp}" target="_blank" rel="noopener" class="pill-btn pill-btn-outline">
+          <svg viewBox="0 0 24 24" style="width:14px;height:14px;fill:currentColor;margin-right:6px"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+          WhatsApp
+        </a>
+      `;
+    }
+  }
+
+  function renderPublication(pub) {
+    if (!pub || pub.is_active === false) return;
+    const tag = document.getElementById('pub-banner-tag');
+    const title = document.getElementById('pub-banner-title');
+    const authors = document.getElementById('pub-banner-authors');
+    const finding = document.getElementById('pub-banner-finding');
+    if (tag && pub.tag) tag.textContent = pub.tag;
+    if (title && pub.title) title.textContent = pub.title;
+    if (authors && pub.authors) authors.textContent = pub.authors;
+    if (finding && pub.finding) finding.textContent = pub.finding;
+  }
+
+  function renderProjects(projs = activeProjects) {
     const container = document.getElementById('projects-container');
+    if (!container) return;
     container.innerHTML = '';
 
-    PROJECTS.forEach((p, idx) => {
+    projs.forEach((p, idx) => {
       const row = document.createElement('article');
       row.className = 'project-row';
 
-      const mediaHtml = p.media.type === 'video' ? `
-        <video src="${p.media.src}" muted loop playsinline autoplay poster="${p.media.thumb || ''}"></video>
+      const isVid = (p.media_type === 'video') || (p.media && p.media.type === 'video');
+      const mSrc = p.media_src || (p.media ? p.media.src : '');
+      const mThumb = p.media_thumb || (p.media ? p.media.thumb : '');
+
+      const mediaHtml = isVid ? `
+        <video src="${mSrc}" muted loop playsinline autoplay poster="${mThumb || ''}"></video>
       ` : `
-        <img src="${p.media.src}" alt="${p.title}" loading="lazy" />
+        <img src="${mSrc}" alt="${p.title}" loading="lazy" />
       `;
 
       row.innerHTML = `
@@ -585,8 +643,8 @@ footer {
           <h3 class="proj-heading">${p.title}</h3>
           <div class="proj-badges">
             <span class="pill-badge">${p.category}</span>
-            ${p.subCategory ? `<span class="pill-badge">${p.subCategory}</span>` : ''}
-            <span class="pill-badge pill-badge-status">${p.badge}</span>
+            ${(p.sub_category || p.subCategory) ? `<span class="pill-badge">${p.sub_category || p.subCategory}</span>` : ''}
+            ${p.badge ? `<span class="pill-badge pill-badge-status">${p.badge}</span>` : ''}
           </div>
           <p class="proj-desc">${p.summary}</p>
           ${p.detail ? `<p class="proj-desc" style="margin-top:-6px;">${p.detail}</p>` : ''}
@@ -602,23 +660,25 @@ footer {
     });
   }
 
-  function renderExperience() {
+  function renderExperience(exps = activeExperiences) {
     const list = document.getElementById('experience-list');
-    list.innerHTML = EXPERIENCES.map(e => `
+    if (!list) return;
+    list.innerHTML = exps.map(e => `
       <div class="exp-item">
         <div class="exp-date">${e.period}</div>
         <div>
           <div class="exp-title">${e.role}</div>
           <div class="exp-org">${e.org}</div>
-          <p style="margin:0; font-size:0.95rem;">${e.desc}</p>
+          <p style="margin:0; font-size:0.95rem;">${e.description || e.desc}</p>
         </div>
       </div>
     `).join('');
   }
 
-  function renderHighlights() {
+  function renderHighlights(hls = activeHighlights) {
     const container = document.getElementById('highlights-container');
-    container.innerHTML = HIGHLIGHTS.map(h => `
+    if (!container) return;
+    container.innerHTML = hls.map(h => `
       <div class="hl-card">
         <div>
           <div class="num">${h.num}</div>
@@ -628,38 +688,58 @@ footer {
           <div style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--acc); font-weight:700; margin-bottom:6px;">
             ${h.badge}
           </div>
-          <p style="margin:0; font-size:0.95rem;">${h.desc}</p>
+          <p style="margin:0; font-size:0.95rem;">${h.description || h.desc}</p>
         </div>
       </div>
     `).join('');
   }
 
-  function renderProfile() {
-    document.getElementById('nav-cv').href = PROFILE.cv;
-    document.getElementById('hero-github').href = PROFILE.github;
+  // ── Live Supabase Hydration ──
+  async function fetchLiveSupabaseData() {
+    if (!supabase) return;
+    try {
+      const { data: prof } = await supabase.from('site_content').select('data').eq('id', 'profile').maybeSingle();
+      if (prof && prof.data) {
+        activeProfile = { ...activeProfile, ...prof.data };
+        renderProfile(activeProfile);
+      }
 
-    const contact = document.getElementById('contact-container');
-    contact.innerHTML = `
-      <a href="mailto:${PROFILE.email}" class="pill-btn pill-btn-solid">
-        <svg viewBox="0 0 24 24" style="width:14px;height:14px;fill:currentColor;margin-right:6px"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
-        ${PROFILE.email}
-      </a>
-      <a href="${PROFILE.github}" target="_blank" rel="noopener" class="pill-btn pill-btn-outline">
-        <svg viewBox="0 0 24 24" style="width:14px;height:14px;fill:currentColor;margin-right:6px"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.44 9.8 8.21 11.39.6.11.82-.26.82-.58v-2.03c-3.34.73-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.09-.75.08-.73.08-.73 1.2.08 1.84 1.24 1.84 1.24 1.07 1.83 2.81 1.3 3.5 1 .11-.78.42-1.3.76-1.6-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.12-.3-.54-1.52.12-3.17 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 013-.4c1.02.005 2.04.14 3 .4 2.28-1.55 3.29-1.23 3.29-1.23.66 1.65.24 2.87.12 3.17.77.84 1.24 1.91 1.24 3.22 0 4.61-2.81 5.63-5.48 5.92.43.37.81 1.1.81 2.22v3.29c0 .32.21.7.82.58C20.56 21.8 24 17.3 24 12c0-6.63-5.37-12-12-12z"/></svg>
-        GitHub
-      </a>
-      <a href="${PROFILE.whatsapp}" target="_blank" rel="noopener" class="pill-btn pill-btn-outline">
-        <svg viewBox="0 0 24 24" style="width:14px;height:14px;fill:currentColor;margin-right:6px"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-        WhatsApp
-      </a>
-    `;
+      const { data: pub } = await supabase.from('site_content').select('data').eq('id', 'publication').maybeSingle();
+      if (pub && pub.data) {
+        renderPublication(pub.data);
+      }
+
+      const { data: projs } = await supabase.from('projects').select('*').order('display_order', { ascending: true });
+      if (projs && projs.length > 0) {
+        activeProjects = projs;
+        renderProjects(activeProjects);
+      }
+
+      const { data: exps } = await supabase.from('experiences').select('*').order('display_order', { ascending: true });
+      if (exps && exps.length > 0) {
+        activeExperiences = exps;
+        renderExperience(activeExperiences);
+      }
+
+      const { data: hls } = await supabase.from('highlights').select('*').order('display_order', { ascending: true });
+      if (hls && hls.length > 0) {
+        activeHighlights = hls;
+        renderHighlights(activeHighlights);
+      }
+    } catch (e) {
+      console.warn('Supabase live fetch notice:', e);
+    }
   }
 
   document.addEventListener('DOMContentLoaded', () => {
-    renderProfile();
-    renderProjects();
-    renderExperience();
-    renderHighlights();
+    // 1. Instant baseline render
+    renderProfile(activeProfile);
+    renderProjects(activeProjects);
+    renderExperience(activeExperiences);
+    renderHighlights(activeHighlights);
+
+    // 2. Fetch live database data
+    fetchLiveSupabaseData();
   });
 </script>
 </body>

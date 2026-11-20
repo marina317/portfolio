@@ -605,8 +605,13 @@ footer {
   <p>© 2026 Marina Mohsen · AI Engineer</p>
 </footer>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="data/projects.js"></script>
 <script>
+  const SUPABASE_URL = "https://alnjcmucdopkbnnhvpcx.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_cRPbMziUWTSbU7rbhZdFTQ_s3sL7vuh";
+  const supabase = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
+
   mermaid.initialize({
     startOnLoad: false,
     theme: 'base',
@@ -624,20 +629,12 @@ footer {
     return new URLSearchParams(window.location.search).get(p);
   }
 
-  document.addEventListener('DOMContentLoaded', () => {
-    const storedP = localStorage.getItem('marina_projects_data');
-    const projects = storedP ? JSON.parse(storedP) : PROJECTS;
-    document.getElementById('nav-cv').href = PROFILE.cv || 'assets/cv.pdf';
-
-    const pid = getQueryParam('id') || projects[0].id;
-    const idx = projects.findIndex(item => item.id === pid);
-    const p = idx !== -1 ? projects[idx] : projects[0];
-
+  function renderProjectPage(p, prevId, nextId) {
     document.title = `${p.title} — Marina Mohsen`;
     document.getElementById('proj-badge').textContent = p.badge || 'Project';
     document.getElementById('proj-date').textContent = p.date || '';
     document.getElementById('proj-title').textContent = p.title;
-    document.getElementById('proj-subtitle').textContent = p.category;
+    document.getElementById('proj-subtitle').textContent = p.category || (p.sub_category || '');
 
     // Metrics
     const metricsRow = document.getElementById('proj-metrics');
@@ -648,6 +645,7 @@ footer {
           <div class="metric-lbl">${m.label}</div>
         </div>
       `).join('');
+      metricsRow.style.display = 'grid';
     } else {
       metricsRow.style.display = 'none';
     }
@@ -664,10 +662,14 @@ footer {
 
     // Media
     const mediaBox = document.getElementById('proj-media-box');
-    if (p.media && p.media.type === 'video' && p.media.src) {
-      mediaBox.innerHTML = `<video src="${p.media.src}" controls playsinline autoplay muted loop poster="${p.media.thumb || ''}"></video>`;
-    } else if (p.media && p.media.type === 'image' && p.media.src) {
-      mediaBox.innerHTML = `<img src="${p.media.src}" alt="${p.title}" />`;
+    const isVid = (p.media_type === 'video') || (p.media && p.media.type === 'video');
+    const mSrc = p.media_src || (p.media ? p.media.src : '');
+    const mThumb = p.media_thumb || (p.media ? p.media.thumb : '');
+
+    if (isVid && mSrc) {
+      mediaBox.innerHTML = `<video src="${mSrc}" controls playsinline autoplay muted loop poster="${mThumb || ''}"></video>`;
+    } else if (mSrc) {
+      mediaBox.innerHTML = `<img src="${mSrc}" alt="${p.title}" />`;
     } else {
       mediaBox.innerHTML = `
         <div style="padding:48px; text-align:center;">
@@ -679,8 +681,9 @@ footer {
     // Technical Description Writeup
     document.getElementById('proj-writeup').innerHTML = `
       <h2>Engineering Overview</h2>
-      <p>${p.summary}</p>
+      <p>${p.summary || ''}</p>
       ${p.detail ? `<p>${p.detail}</p>` : ''}
+      ${p.description ? `<div>${p.description}</div>` : ''}
       ${p.tags && p.tags.length ? `
         <h3 style="margin-top:24px;">Core Technologies</h3>
         <div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:12px;">
@@ -689,11 +692,43 @@ footer {
       ` : ''}
     `;
 
-    // Prev / Next links
-    const prevIdx = (idx - 1 + projects.length) % projects.length;
-    const nextIdx = (idx + 1) % projects.length;
-    document.getElementById('prev-btn').href = `project.html?id=${projects[prevIdx].id}`;
-    document.getElementById('next-btn').href = `project.html?id=${projects[nextIdx].id}`;
+    if (prevId) document.getElementById('prev-btn').href = `project.html?id=${prevId}`;
+    if (nextId) document.getElementById('next-btn').href = `project.html?id=${nextId}`;
+  }
+
+  async function loadProjectDetails() {
+    const pid = getQueryParam('id') || PROJECTS[0].id;
+
+    // Default baseline render
+    let projectsList = PROJECTS;
+    let idx = projectsList.findIndex(item => item.id === pid);
+    if (idx === -1) idx = 0;
+    let p = projectsList[idx];
+
+    let prevIdx = (idx - 1 + projectsList.length) % projectsList.length;
+    let nextIdx = (idx + 1) % projectsList.length;
+    renderProjectPage(p, projectsList[prevIdx].id, projectsList[nextIdx].id);
+
+    // Supabase Live Fetch
+    if (supabase) {
+      try {
+        const { data: dbProjs } = await supabase.from('projects').select('*').order('display_order', { ascending: true });
+        if (dbProjs && dbProjs.length > 0) {
+          projectsList = dbProjs;
+          idx = projectsList.findIndex(item => item.id === pid);
+          if (idx === -1) idx = 0;
+          p = projectsList[idx];
+          prevIdx = (idx - 1 + projectsList.length) % projectsList.length;
+          nextIdx = (idx + 1) % projectsList.length;
+          renderProjectPage(p, projectsList[prevIdx].id, projectsList[nextIdx].id);
+        }
+      } catch(e) {}
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('nav-cv').href = PROFILE.cv || 'assets/cv.pdf';
+    loadProjectDetails();
   });
 </script>
 </body>
